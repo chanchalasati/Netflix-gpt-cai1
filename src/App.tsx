@@ -1,8 +1,8 @@
 import React from "react";
-import "./App.css";
+import Body from "./components/Body";
 
 function App() {
-  return <div className="text-red-800 text-3xl">NetFlix GPT</div>;
+  return <Body></Body>;
 }
 
 export default App;
