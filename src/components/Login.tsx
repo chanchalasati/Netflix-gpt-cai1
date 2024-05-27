@@ -1,10 +1,23 @@
-import React, { useState } from "react";
+import { useRef, useState } from "react";
 import Header from "./Header";
+import { checkValidation } from "../utils/checkValidation";
 
 const Login = () => {
   const [isSignInForm, setSignInForm] = useState(true);
+  const email = useRef<HTMLInputElement>(null);
+  const password = useRef<HTMLInputElement>(null);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
-  const toggelSignInForm = () => {
+    const handleSubmit = () => {
+        let message = "";
+    if (email.current && password.current) {
+     
+        message = checkValidation(email.current.value, password.current?.value)
+        console.log(message);
+        }
+        setErrorMessage(message);
+  };
+    const toggelSignInForm = () => {
     setSignInForm(!isSignInForm);
   };
   return (
@@ -16,28 +29,44 @@ const Login = () => {
           alt="bkImage"
         ></img>
       </div>
-      <form className="w-3/12 absolute p-12 bg-black my-36 mx-auto right-0 left-0 text-white rounded-lg bg-opacity-80">
+      <form
+        onSubmit={(e) => e.preventDefault()}
+        className="w-3/12 absolute p-12 bg-black my-36 mx-auto right-0 left-0 text-white rounded-lg bg-opacity-80"
+      >
+        {errorMessage ? (
+          <div className="py-4 my-4 bg-yellow-600 rounded-lg text-black">
+            <p className="font-bold py-2 px-2">{`Incorrect password for ${email.current?.value}`}</p>
+            <p className="py-2 px-2">
+              {"You can use a sign-in code, reset your password or try again."}
+            </p>
+          </div>
+        ):""}
         <h1 className="font-bold text-3xl py-4">
           {isSignInForm ? "Sign In" : "Sign Up"}
         </h1>
         <input
+          ref={email}
           type="text"
           placeholder="enter email"
           className="p-2 my-4 w-full bg-gray-700 rounded-lg bg-opacity-90"
         ></input>
-        {!isSignInForm && 
+        {!isSignInForm && (
           <input
             type="text"
             placeholder="enter Full Name"
             className="p-2 my-4 w-full bg-gray-700 rounded-md"
           ></input>
-        }
+        )}
         <input
-          type="text"
-          placeholder="enter email"
+          ref={password}
+          type="password"
+          placeholder="enter password"
           className="p-2 my-4 w-full bg-gray-700 rounded-md"
         ></input>
-        <button className="p-4 my-6 bg-red-800 font-bold w-full rounded-md bg-opacity-90">
+        <button
+          className="p-4 my-6 bg-red-800 font-bold w-full rounded-md bg-opacity-90"
+          onClick={handleSubmit}
+        >
           {isSignInForm ? "Sign In" : "Sign Up"}
         </button>
         <p className="py-4 cursor-pointer" onClick={toggelSignInForm}>
