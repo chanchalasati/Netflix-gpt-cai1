@@ -1,23 +1,80 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Header from "./Header";
 import { checkValidation } from "../utils/checkValidation";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { auth } from "../utils/firebase";
+import { UseDispatch, useDispatch } from "react-redux";
+import { adduser } from "../utils/userSlice";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [isSignInForm, setSignInForm] = useState(true);
   const email = useRef<HTMLInputElement>(null);
+  const username = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);
+  const dispatch = useDispatch();
   const [errorMessage, setErrorMessage] = useState<string>("");
-
-    const handleSubmit = () => {
-        let message = "";
+  const navigate = useNavigate();
+  useEffect(() => {
+    console.log(isSignInForm);
+  }, [isSignInForm]);
+  const handleSubmit = () => {
+    let message = "";
     if (email.current && password.current) {
-     
-        message = checkValidation(email.current.value, password.current?.value)
-        console.log(message);
-        }
-        setErrorMessage(message);
+      message = checkValidation(email.current.value, password.current?.value);
+      console.log(message);
+    }
+    setErrorMessage(message);
+    if (message) return;
+
+    if (!isSignInForm) {
+      if (email.current && password.current) {
+        let emailRef = email.current.value;
+        let passwordRef = password.current.value;
+
+        createUserWithEmailAndPassword(auth, emailRef, passwordRef)
+          .then((userCredential) => {
+            const user = userCredential.user;
+            if (username.current) { 
+              let userRef = username.current.value;
+              updateProfile(user, {
+                displayName: userRef, photoURL: ""
+              }).then(() => {
+                const {uid, email, displayName} = auth.currentUser;
+               dispatch(adduser({ uid: uid, email: email, displayName: displayName }));
+               navigate("/browse");
+              }).catch((error) => {
+                setErrorMessage(error);
+              });
+            }
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            setErrorMessage(errorMessage);
+          });
+      }
+    } else {
+      if (email.current && password.current) {
+        let emailRef = email.current.value;
+        let passwordRef = password.current.value;
+        signInWithEmailAndPassword(auth, emailRef, passwordRef)
+          .then((userCredential) => {
+            const user = userCredential.user;
+            navigate("/browse");
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+          });
+      }
+    }
   };
-    const toggelSignInForm = () => {
+  const toggelSignInForm = () => {
     setSignInForm(!isSignInForm);
   };
   return (
@@ -40,7 +97,9 @@ const Login = () => {
               {"You can use a sign-in code, reset your password or try again."}
             </p>
           </div>
-        ):""}
+        ) : (
+          ""
+        )}
         <h1 className="font-bold text-3xl py-4">
           {isSignInForm ? "Sign In" : "Sign Up"}
         </h1>
@@ -52,6 +111,7 @@ const Login = () => {
         ></input>
         {!isSignInForm && (
           <input
+            ref={ username}
             type="text"
             placeholder="enter Full Name"
             className="p-2 my-4 w-full bg-gray-700 rounded-md"
