@@ -7,9 +7,9 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { auth } from "../utils/firebase";
-import { UseDispatch, useDispatch } from "react-redux";
+import {useDispatch } from "react-redux";
 import { adduser } from "../utils/userSlice";
-import { useNavigate } from "react-router-dom";
+
 
 const Login = () => {
   const [isSignInForm, setSignInForm] = useState(true);
@@ -18,15 +18,11 @@ const Login = () => {
   const password = useRef<HTMLInputElement>(null);
   const dispatch = useDispatch();
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const navigate = useNavigate();
-  useEffect(() => {
-    console.log(isSignInForm);
-  }, [isSignInForm]);
+  
   const handleSubmit = () => {
     let message = "";
     if (email.current && password.current) {
       message = checkValidation(email.current.value, password.current?.value);
-      console.log(message);
     }
     setErrorMessage(message);
     if (message) return;
@@ -44,12 +40,12 @@ const Login = () => {
               updateProfile(user, {
                 displayName: userRef, photoURL: ""
               }).then(() => {
-                if (auth.currentUser){
+                if (auth.currentUser) {
                   const { uid, email, displayName } = auth.currentUser;
                   dispatch(adduser({ uid: uid, email: email, displayName: displayName }));
+                }
               }
-               navigate("/browse");
-              }).catch((error) => {
+              ).catch((error) => {
                 setErrorMessage(error);
               });
             }
@@ -67,7 +63,6 @@ const Login = () => {
         signInWithEmailAndPassword(auth, emailRef, passwordRef)
           .then((userCredential) => {
             const user = userCredential.user;
-            navigate("/browse");
           })
           .catch((error) => {
             const errorCode = error.code;
