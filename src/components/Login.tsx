@@ -44,8 +44,10 @@ const Login = () => {
               updateProfile(user, {
                 displayName: userRef, photoURL: ""
               }).then(() => {
-                const {uid, email, displayName} = auth.currentUser;
-               dispatch(adduser({ uid: uid, email: email, displayName: displayName }));
+                if (auth.currentUser){
+                  const { uid, email, displayName } = auth.currentUser;
+                  dispatch(adduser({ uid: uid, email: email, displayName: displayName }));
+              }
                navigate("/browse");
               }).catch((error) => {
                 setErrorMessage(error);
